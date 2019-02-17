@@ -1,4 +1,4 @@
-![Healthcare Integrations Logo](https://healthcareintegrations.com/images/logos/HealthcareIntegrations.png | height=455)
+<img src="https://healthcareintegrations.com/images/logos/HealthcareIntegrations.png" width="455" height="124">
 
 # Google-Cloud-NextGen-Connect
 
