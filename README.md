@@ -74,4 +74,7 @@ PV1||I|H73 RM1^1^^HIGHWAY 73 CLINIC||||5148^MARY QUINN|||||||||Y||||||||||||||||
 * [Google Healthcare API Authentication Documentation](https://cloud.google.com/healthcare/docs/how-tos/authentication)
 * [NextGen Connect User Guide](https://bridge.nextgen.com/media/3244/)
 
+## Older Versions of NextGen Connect/Mirth Connect
+
+The current channel is only supported by NextGen Connect Version 3.7.0. If you are running an older version of NextGen Connect/Mirth Connect, please contact us at Contact@HealthcareIntegrations.com with your version number and we will provide a version to you. Alternatively, please create a new Issue in this repo and specify your version number there. We will add additional versions to this repo as needed.
 
