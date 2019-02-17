@@ -1,0 +1,711 @@
+<channel version="3.7.0">
+  <id>46a43cc7-05ef-465d-a152-b2b1e5a2fdd5</id>
+  <nextMetaDataId>5</nextMetaDataId>
+  <name>Google Healthcare API</name>
+  <description>This channel was developed for Google by Stephen Veach @ Healthcare Integrations:
+
+https://www.healthcareintegrations.com/
+Contact@HealthcareIntegrations.com
+
+We offer support and customization of this channel, development of new channels, and much more. If you need assistance, please contact us!</description>
+  <revision>6</revision>
+  <sourceConnector version="3.7.0">
+    <metaDataId>0</metaDataId>
+    <name>sourceConnector</name>
+    <properties class="com.mirth.connect.connectors.vm.VmReceiverProperties" version="3.7.0">
+      <pluginProperties/>
+      <sourceConnectorProperties version="3.7.0">
+        <responseVariable>None</responseVariable>
+        <respondAfterProcessing>true</respondAfterProcessing>
+        <processBatch>false</processBatch>
+        <firstResponse>false</firstResponse>
+        <processingThreads>1</processingThreads>
+        <resourceIds class="linked-hash-map">
+          <entry>
+            <string>Default Resource</string>
+            <string>[Default Resource]</string>
+          </entry>
+        </resourceIds>
+        <queueBufferSize>1000</queueBufferSize>
+      </sourceConnectorProperties>
+    </properties>
+    <transformer version="3.7.0">
+      <elements>
+        <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.7.0">
+          <name>Define API Version, Project ID, Location ID, Dataset ID, and HL7v2 Store ID</name>
+          <sequenceNumber>0</sequenceNumber>
+          <enabled>true</enabled>
+          <script>//Change these settings as needed.
+
+var API_VERSION = &apos;v1alpha2&apos;;
+var PROJECT_ID = &apos;your-project-id&apos;;
+var LOCATION_ID = &apos;us-central1&apos;;
+var DATASET_ID = &apos;your-dataset-id&apos;;
+var HL7_STORE_ID = &apos;your-store-id&apos;;
+
+//Don&apos;t edit anything below this line!
+var DESTINATION_ENDPOINT = &apos;https://healthcare.googleapis.com/&apos; 
++ API_VERSION + &apos;/projects/&apos; 
++ PROJECT_ID + &apos;/locations/&apos; 
++ LOCATION_ID + &apos;/datasets/&apos; 
++ DATASET_ID + &apos;/hl7V2Stores/&apos; 
++ HL7_STORE_ID + &apos;/messages:ingest&apos;;
+
+channelMap.put(&apos;DESTINATION_ENDPOINT&apos;, DESTINATION_ENDPOINT);
+//logger.info(&apos;Sending messages to: &apos; + DESTINATION_ENDPOINT);</script>
+        </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+        <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.7.0">
+          <name>Load Google Healthcare API Credentials from File OR Paste JSON Key Data Here</name>
+          <sequenceNumber>1</sequenceNumber>
+          <enabled>true</enabled>
+          <script>// NOTE: You can either provide the path to the key file, OR paste the JSON key file itself here.
+// If you do not have your JSON key file yet, go here to create an IAM service account: https://cloud.google.com/iam/docs/creating-managing-service-accounts
+// Then go here for instructions on generating the JSON key file: https://cloud.google.com/iam/docs/creating-managing-service-account-keys
+
+// If you are pasting the JSON Key in, it should look like this:
+/*
+
+var keyObject = 
+{
+  &quot;type&quot;: &quot;service_account&quot;,
+  &quot;project_id&quot;: &quot;some-project-id&quot;,
+  &quot;private_key_id&quot;: &quot;6fba284b7c4ba66b9006a6bd0a2ddb74e3b6afbb&quot;,
+  &quot;private_key&quot;: &quot;-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n&quot;,
+  &quot;client_email&quot;: &quot;some-name@your-account-goes-here.iam.gserviceaccount.com&quot;,
+  &quot;client_id&quot;: &quot;000000000000000000000&quot;,
+  &quot;auth_uri&quot;: &quot;https://accounts.google.com/o/oauth2/auth&quot;,
+  &quot;token_uri&quot;: &quot;https://oauth2.googleapis.com/token&quot;,
+  &quot;auth_provider_x509_cert_url&quot;: &quot;https://www.googleapis.com/oauth2/v1/certs&quot;,
+  &quot;client_x509_cert_url&quot;: &quot;https://www.googleapis.com/robot/v1/metadata/x509/some-name%40your-account-goes-here.iam.gserviceaccount.com&quot;
+}
+;
+*/
+
+// PASTE JSON KEY BELOW, replacing the brackets:
+var keyObject = 
+{
+
+}
+;
+// END JSON KEY
+if (keyObject.private_key &amp;&amp; keyObject.private_key.length &gt; 0) {
+	var PRIVATE_KEY = keyObject.private_key;
+	var CLIENT_EMAIL = keyObject.client_email;
+	channelMap.put(&apos;private_key&apos;, PRIVATE_KEY);
+	channelMap.put(&apos;service_account&apos;, CLIENT_EMAIL);
+} else {
+
+
+
+
+
+// WARNING!! ONLY CHANGE THE SECTION BELOW IF YOU ARE READING CREDENTIALS FROM A FILE INSTEAD OF PASTING IT ABOVE.
+
+
+
+
+// Loading credentials via a JSON file located on the same server as Mirth:
+// Specify the full path to the key file, including the filename itself.
+// Examples: 
+// var filepath = &apos;/users/someuser/google-api.json&apos;;
+// var filepath = &apos;C:\Users\Some User\Desktop\google-api.json&apos;;
+
+	var filepath = &apos;users/someuser/google-api.json&apos;;
+	
+	try {
+		//Attempt to read the file.
+		if (filepath.length &gt; 0) {
+			var content = FileUtil.read(filepath);
+			if (!content) {
+				logger.error(&apos;Error reading &apos; + filepath + &apos;.&apos;);
+			}
+			if (content.length() &lt; 1) {
+				//logger.debug(&apos;JSON key contents: &apos; + content);
+				logger.error(&apos;Error reading &apos; + filepath + &apos;. File exists, but was empty!&apos;);
+			}
+		}
+	} catch (ex) {
+		logger.error(&apos;Exception: &apos; + ex.toString());
+	}
+	
+	//Parse the file if it&apos;s been loaded.
+	if (content &amp;&amp; content.length() &gt; 0) {
+		var keyObject = JSON.parse(content);
+		var PRIVATE_KEY = keyObject.private_key;
+		var CLIENT_EMAIL = keyObject.client_email;
+		channelMap.put(&apos;private_key&apos;, PRIVATE_KEY);
+		channelMap.put(&apos;service_account&apos;, CLIENT_EMAIL);
+	}
+}
+
+/*
+This channel was developed for Google by Stephen Veach @ Healthcare Integrations:
+
+https://www.healthcareintegrations.com/
+Contact@HealthcareIntegrations.com
+
+We offer support and customization of this channel, development of new channels, and much more. If you need assistance, please contact us!
+*/</script>
+        </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+        <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.7.0">
+          <name>Verify Key and Service Account have been provided, error out if not.</name>
+          <sequenceNumber>2</sequenceNumber>
+          <enabled>true</enabled>
+          <script>// WARNING: NO CHANGES ARE NEEDED HERE FOR NORMAL USE.
+
+
+if (!$(&apos;private_key&apos;) || $(&apos;private_key&apos;).length === 0 || !$(&apos;service_account&apos;) || $(&apos;service_account&apos;).length === 0) {
+	logger.error(&quot;Google Healthcare API Credentials haven&apos;t been provided! Please edit the channel, click on the Source tab, then click Edit Transformer to provide credentials.&quot;);
+	// If no credentials were provided, don&apos;t try to send anything.
+	destinationSet.removeAll();
+}</script>
+        </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+        <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.7.0">
+          <name>See if current access token is valid - skip the process of generating a JWT and exchanging for an access token if so</name>
+          <sequenceNumber>3</sequenceNumber>
+          <enabled>true</enabled>
+          <script>// WARNING: NO CHANGES ARE NEEDED HERE FOR NORMAL USE.
+
+var expiry = globalChannelMap.get(&apos;token_expiry&apos;);
+
+if (!expiry || Date() &gt; expiry) {
+	//logger.info(&quot;Token is expired or doesn&apos;t exist! Get a new one! &quot; + Date() + &apos; &apos; + expiry);
+} else {
+	destinationSet.remove([&apos;Exchange JWT for Access Token&apos;]);
+	//logger.info(&apos;Token is not expired yet! &apos; + expiry);
+}</script>
+        </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+      </elements>
+      <inboundTemplate encoding="base64"></inboundTemplate>
+      <outboundTemplate encoding="base64"></outboundTemplate>
+      <inboundDataType>HL7V2</inboundDataType>
+      <outboundDataType>HL7V2</outboundDataType>
+      <inboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.7.0">
+        <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.7.0">
+          <handleRepetitions>true</handleRepetitions>
+          <handleSubcomponents>true</handleSubcomponents>
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <stripNamespaces>true</stripNamespaces>
+          <segmentDelimiter>\r</segmentDelimiter>
+          <convertLineBreaks>true</convertLineBreaks>
+        </serializationProperties>
+        <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.7.0">
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <segmentDelimiter>\r</segmentDelimiter>
+        </deserializationProperties>
+        <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.7.0">
+          <splitType>MSH_Segment</splitType>
+          <batchScript></batchScript>
+        </batchProperties>
+        <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.7.0">
+          <segmentDelimiter>\r</segmentDelimiter>
+          <successfulACKCode>AA</successfulACKCode>
+          <successfulACKMessage></successfulACKMessage>
+          <errorACKCode>AE</errorACKCode>
+          <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+          <rejectedACKCode>AR</rejectedACKCode>
+          <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+          <msh15ACKAccept>false</msh15ACKAccept>
+          <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+        </responseGenerationProperties>
+        <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.7.0">
+          <successfulACKCode>AA,CA</successfulACKCode>
+          <errorACKCode>AE,CE</errorACKCode>
+          <rejectedACKCode>AR,CR</rejectedACKCode>
+          <validateMessageControlId>true</validateMessageControlId>
+          <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+          <originalIdMapVariable></originalIdMapVariable>
+        </responseValidationProperties>
+      </inboundProperties>
+      <outboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.7.0">
+        <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.7.0">
+          <handleRepetitions>true</handleRepetitions>
+          <handleSubcomponents>true</handleSubcomponents>
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <stripNamespaces>true</stripNamespaces>
+          <segmentDelimiter>\r</segmentDelimiter>
+          <convertLineBreaks>true</convertLineBreaks>
+        </serializationProperties>
+        <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.7.0">
+          <useStrictParser>false</useStrictParser>
+          <useStrictValidation>false</useStrictValidation>
+          <segmentDelimiter>\r</segmentDelimiter>
+        </deserializationProperties>
+        <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.7.0">
+          <splitType>MSH_Segment</splitType>
+          <batchScript></batchScript>
+        </batchProperties>
+        <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.7.0">
+          <segmentDelimiter>\r</segmentDelimiter>
+          <successfulACKCode>AA</successfulACKCode>
+          <successfulACKMessage></successfulACKMessage>
+          <errorACKCode>AE</errorACKCode>
+          <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+          <rejectedACKCode>AR</rejectedACKCode>
+          <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+          <msh15ACKAccept>false</msh15ACKAccept>
+          <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+        </responseGenerationProperties>
+        <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.7.0">
+          <successfulACKCode>AA,CA</successfulACKCode>
+          <errorACKCode>AE,CE</errorACKCode>
+          <rejectedACKCode>AR,CR</rejectedACKCode>
+          <validateMessageControlId>true</validateMessageControlId>
+          <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+          <originalIdMapVariable></originalIdMapVariable>
+        </responseValidationProperties>
+      </outboundProperties>
+    </transformer>
+    <filter version="3.7.0">
+      <elements/>
+    </filter>
+    <transportName>Channel Reader</transportName>
+    <mode>SOURCE</mode>
+    <enabled>true</enabled>
+    <waitForPrevious>true</waitForPrevious>
+  </sourceConnector>
+  <destinationConnectors>
+    <connector version="3.7.0">
+      <metaDataId>2</metaDataId>
+      <name>Exchange JWT for Access Token</name>
+      <properties class="com.mirth.connect.connectors.http.HttpDispatcherProperties" version="3.7.0">
+        <pluginProperties/>
+        <destinationConnectorProperties version="3.7.0">
+          <queueEnabled>false</queueEnabled>
+          <sendFirst>false</sendFirst>
+          <retryIntervalMillis>10000</retryIntervalMillis>
+          <regenerateTemplate>false</regenerateTemplate>
+          <retryCount>0</retryCount>
+          <rotate>false</rotate>
+          <includeFilterTransformer>false</includeFilterTransformer>
+          <threadCount>1</threadCount>
+          <threadAssignmentVariable></threadAssignmentVariable>
+          <validateResponse>false</validateResponse>
+          <resourceIds class="linked-hash-map">
+            <entry>
+              <string>Default Resource</string>
+              <string>[Default Resource]</string>
+            </entry>
+          </resourceIds>
+          <queueBufferSize>1000</queueBufferSize>
+          <reattachAttachments>true</reattachAttachments>
+        </destinationConnectorProperties>
+        <host>https://www.googleapis.com/oauth2/v4/token</host>
+        <useProxyServer>false</useProxyServer>
+        <proxyAddress></proxyAddress>
+        <proxyPort></proxyPort>
+        <method>post</method>
+        <headers class="linked-hash-map"/>
+        <parameters class="linked-hash-map">
+          <entry>
+            <string>grant_type</string>
+            <list>
+              <string>urn:ietf:params:oauth:grant-type:jwt-bearer</string>
+            </list>
+          </entry>
+          <entry>
+            <string>assertion</string>
+            <list>
+              <string>${JWT}</string>
+            </list>
+          </entry>
+        </parameters>
+        <responseXmlBody>false</responseXmlBody>
+        <responseParseMultipart>true</responseParseMultipart>
+        <responseIncludeMetadata>false</responseIncludeMetadata>
+        <responseBinaryMimeTypes>application/.*(?&lt;!json|xml)$|image/.*|video/.*|audio/.*</responseBinaryMimeTypes>
+        <responseBinaryMimeTypesRegex>true</responseBinaryMimeTypesRegex>
+        <multipart>false</multipart>
+        <useAuthentication>false</useAuthentication>
+        <authenticationType>Basic</authenticationType>
+        <usePreemptiveAuthentication>false</usePreemptiveAuthentication>
+        <username></username>
+        <password></password>
+        <content></content>
+        <contentType>application/x-www-form-urlencoded</contentType>
+        <dataTypeBinary>false</dataTypeBinary>
+        <charset>UTF-8</charset>
+        <socketTimeout>30000</socketTimeout>
+      </properties>
+      <transformer version="3.7.0">
+        <elements>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.7.0">
+            <name>Create JWT and sign it</name>
+            <sequenceNumber>0</sequenceNumber>
+            <enabled>true</enabled>
+            <script>// WARNING: NO CHANGES ARE NEEDED HERE FOR NORMAL USE.
+
+importPackage(javax.crypto);
+importPackage(javax.crypto.spec);
+importPackage(java.security);
+
+//Header
+var header = {};
+header.alg = &apos;RS256&apos;;
+header.typ = &apos;JWT&apos;;
+header.kid = $(&apos;private_key&apos;);
+var b64header = FileUtil.encode(new java.lang.String(JSON.stringify(header)).getBytes(&apos;UTF-8&apos;));
+
+//Claim Set
+var claimSet = {};
+claimSet.iss = $(&apos;service_account&apos;);
+claimSet.scope = &apos;https://www.googleapis.com/auth/cloud-healthcare&apos;;
+claimSet.aud = &apos;https://www.googleapis.com/oauth2/v4/token&apos;;
+claimSet.exp = Math.round((new Date()).getTime() / 1000) + 3600;
+claimSet.iat = Math.round((new Date()).getTime() / 1000);
+var b64claimSet = FileUtil.encode(new java.lang.String(JSON.stringify(claimSet)).getBytes(&apos;UTF-8&apos;));
+
+//Signature
+var signature = b64header + &apos;.&apos; + b64claimSet;
+
+//Get the private key and strip the characters that we don&apos;t need.
+var key = $(&apos;private_key&apos;);
+key = key.replaceAll(&apos;-----BEGIN PRIVATE KEY-----&apos;, &apos;&apos;);
+key = key.replaceAll(&apos;\n&apos;, &apos;&apos;);
+key = key.replaceAll(&apos;-----END PRIVATE KEY-----&apos;, &apos;&apos;);
+
+//Sign the signature
+var byteArray = java.util.Base64.getDecoder().decode(key);
+var encodedKeySpec = new PKCS8EncodedKeySpec(byteArray);
+var factory = new KeyFactory.getInstance(&quot;RSA&quot;);
+var privateSignature = new Signature.getInstance(&quot;SHA256withRSA&quot;);
+privateSignature.initSign(factory.generatePrivate(encodedKeySpec));
+privateSignature.update(java.lang.String(signature).getBytes(&quot;UTF-8&quot;));
+var signedSignature = privateSignature.sign();
+signedSignature = FileUtil.encode(signedSignature);
+
+var JWT = b64header + &apos;.&apos; + b64claimSet + &apos;.&apos; + signedSignature;
+channelMap.put(&apos;JWT&apos;, JWT);</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+        </elements>
+        <inboundTemplate encoding="base64"></inboundTemplate>
+        <outboundTemplate encoding="base64"></outboundTemplate>
+        <inboundDataType>HL7V2</inboundDataType>
+        <outboundDataType>JSON</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.7.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.7.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>true</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.7.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.7.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.7.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.7.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.json.JSONDataTypeProperties" version="3.7.0">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.json.JSONBatchProperties" version="3.7.0">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </outboundProperties>
+      </transformer>
+      <responseTransformer version="3.7.0">
+        <elements>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.7.0">
+            <name>Set Access Token and Token Expiry</name>
+            <sequenceNumber>0</sequenceNumber>
+            <enabled>true</enabled>
+            <script>// WARNING: NO CHANGES ARE NEEDED HERE FOR NORMAL USE.
+
+var access_token = msg[&apos;access_token&apos;];
+globalChannelMap.put(&apos;access_token&apos;, access_token);
+
+//Tell the channel when the current access token will expire so we know when to get a new one.
+var date = new Date();
+//Set the date to the expiry time minus 60 seconds - just to make sure we renew the access token early and don&apos;t get an unauthorized error.
+date.setSeconds(date.getSeconds() + (msg[&apos;expires_in&apos;] - 60));
+globalChannelMap.put(&apos;token_expiry&apos;, date);</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+        </elements>
+        <inboundTemplate encoding="base64">ewogICJhY2Nlc3NfdG9rZW4iIDogInlhMjkuYy5FbHFuQmhSdDdsVmRUdFlHTnE5QnFrN3p3NmZC
+X0VndXV6eUF4bjRqMGV3M3pjdGF3RU5NQkJnd0YzLU9IcktEOVZBS2phMURVUTZTcU56dEdHTllK
+Q0RaQ2dVSTFVVE54SEhLcGYyUFFWdzBlNERJcVkxcjRRVFNPVk0iLAogICJleHBpcmVzX2luIiA6
+IDM1OTksCiAgInRva2VuX3R5cGUiIDogIkJlYXJlciIKfQ==</inboundTemplate>
+        <outboundTemplate encoding="base64"></outboundTemplate>
+        <inboundDataType>JSON</inboundDataType>
+        <outboundDataType>JSON</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.json.JSONDataTypeProperties" version="3.7.0">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.json.JSONBatchProperties" version="3.7.0">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.json.JSONDataTypeProperties" version="3.7.0">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.json.JSONBatchProperties" version="3.7.0">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </outboundProperties>
+      </responseTransformer>
+      <filter version="3.7.0">
+        <elements/>
+      </filter>
+      <transportName>HTTP Sender</transportName>
+      <mode>DESTINATION</mode>
+      <enabled>true</enabled>
+      <waitForPrevious>true</waitForPrevious>
+    </connector>
+    <connector version="3.7.0">
+      <metaDataId>3</metaDataId>
+      <name>Send HL7 message to Store</name>
+      <properties class="com.mirth.connect.connectors.http.HttpDispatcherProperties" version="3.7.0">
+        <pluginProperties/>
+        <destinationConnectorProperties version="3.7.0">
+          <queueEnabled>false</queueEnabled>
+          <sendFirst>false</sendFirst>
+          <retryIntervalMillis>10000</retryIntervalMillis>
+          <regenerateTemplate>false</regenerateTemplate>
+          <retryCount>0</retryCount>
+          <rotate>false</rotate>
+          <includeFilterTransformer>false</includeFilterTransformer>
+          <threadCount>1</threadCount>
+          <threadAssignmentVariable></threadAssignmentVariable>
+          <validateResponse>false</validateResponse>
+          <resourceIds class="linked-hash-map">
+            <entry>
+              <string>Default Resource</string>
+              <string>[Default Resource]</string>
+            </entry>
+          </resourceIds>
+          <queueBufferSize>1000</queueBufferSize>
+          <reattachAttachments>true</reattachAttachments>
+        </destinationConnectorProperties>
+        <host>${DESTINATION_ENDPOINT}</host>
+        <useProxyServer>false</useProxyServer>
+        <proxyAddress></proxyAddress>
+        <proxyPort></proxyPort>
+        <method>post</method>
+        <headers class="linked-hash-map">
+          <entry>
+            <string>Authorization</string>
+            <list>
+              <string>Bearer ${access_token}</string>
+            </list>
+          </entry>
+        </headers>
+        <parameters class="linked-hash-map"/>
+        <responseXmlBody>false</responseXmlBody>
+        <responseParseMultipart>true</responseParseMultipart>
+        <responseIncludeMetadata>false</responseIncludeMetadata>
+        <responseBinaryMimeTypes>application/.*(?&lt;!json|xml)$|image/.*|video/.*|audio/.*</responseBinaryMimeTypes>
+        <responseBinaryMimeTypesRegex>true</responseBinaryMimeTypesRegex>
+        <multipart>false</multipart>
+        <useAuthentication>false</useAuthentication>
+        <authenticationType>Basic</authenticationType>
+        <usePreemptiveAuthentication>false</usePreemptiveAuthentication>
+        <username></username>
+        <password></password>
+        <content>${HL7_MESSAGE}</content>
+        <contentType>application/json</contentType>
+        <dataTypeBinary>false</dataTypeBinary>
+        <charset>UTF-8</charset>
+        <socketTimeout>30000</socketTimeout>
+      </properties>
+      <transformer version="3.7.0">
+        <elements>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.7.0">
+            <name>Turn HL7 message into a JSON Object</name>
+            <sequenceNumber>0</sequenceNumber>
+            <enabled>true</enabled>
+            <script>// WARNING: NO CHANGES ARE NEEDED HERE FOR NORMAL USE.
+
+var b64m = new java.lang.String(connectorMessage.getRawData()).getBytes(&apos;UTF-8&apos;);
+
+//Base64 encode the message.
+b64m = FileUtil.encode(b64m);
+//Remove line breaks or the API errors out.
+b64m = b64m.replaceAll(&apos;\r&apos;,&apos;&apos;);
+b64m = b64m.replaceAll(&apos;\n&apos;,&apos;&apos;);
+
+//Create the JSON object
+var object = {};
+var message = {};
+message.data = b64m;
+object.message = message;
+var data = JSON.stringify(object);
+channelMap.put(&apos;HL7_MESSAGE&apos;, data);
+//logger.info(data);</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+        </elements>
+        <inboundTemplate encoding="base64"></inboundTemplate>
+        <outboundTemplate encoding="base64"></outboundTemplate>
+        <inboundDataType>HL7V2</inboundDataType>
+        <outboundDataType>JSON</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DataTypeProperties" version="3.7.0">
+          <serializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2SerializationProperties" version="3.7.0">
+            <handleRepetitions>true</handleRepetitions>
+            <handleSubcomponents>true</handleSubcomponents>
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <stripNamespaces>true</stripNamespaces>
+            <segmentDelimiter>\r</segmentDelimiter>
+            <convertLineBreaks>true</convertLineBreaks>
+          </serializationProperties>
+          <deserializationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2DeserializationProperties" version="3.7.0">
+            <useStrictParser>false</useStrictParser>
+            <useStrictValidation>false</useStrictValidation>
+            <segmentDelimiter>\r</segmentDelimiter>
+          </deserializationProperties>
+          <batchProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2BatchProperties" version="3.7.0">
+            <splitType>MSH_Segment</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+          <responseGenerationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseGenerationProperties" version="3.7.0">
+            <segmentDelimiter>\r</segmentDelimiter>
+            <successfulACKCode>AA</successfulACKCode>
+            <successfulACKMessage></successfulACKMessage>
+            <errorACKCode>AE</errorACKCode>
+            <errorACKMessage>An Error Occurred Processing Message.</errorACKMessage>
+            <rejectedACKCode>AR</rejectedACKCode>
+            <rejectedACKMessage>Message Rejected.</rejectedACKMessage>
+            <msh15ACKAccept>false</msh15ACKAccept>
+            <dateFormat>yyyyMMddHHmmss.SSS</dateFormat>
+          </responseGenerationProperties>
+          <responseValidationProperties class="com.mirth.connect.plugins.datatypes.hl7v2.HL7v2ResponseValidationProperties" version="3.7.0">
+            <successfulACKCode>AA,CA</successfulACKCode>
+            <errorACKCode>AE,CE</errorACKCode>
+            <rejectedACKCode>AR,CR</rejectedACKCode>
+            <validateMessageControlId>true</validateMessageControlId>
+            <originalMessageControlId>Destination_Encoded</originalMessageControlId>
+            <originalIdMapVariable></originalIdMapVariable>
+          </responseValidationProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.json.JSONDataTypeProperties" version="3.7.0">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.json.JSONBatchProperties" version="3.7.0">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </outboundProperties>
+      </transformer>
+      <responseTransformer version="3.7.0">
+        <elements>
+          <com.mirth.connect.plugins.javascriptstep.JavaScriptStep version="3.7.0">
+            <sequenceNumber>0</sequenceNumber>
+            <enabled>true</enabled>
+            <script>// WARNING: NO CHANGES ARE NEEDED HERE FOR NORMAL USE.
+
+if (msg[&apos;error&apos;]) {
+	logger.error(&apos;An error occurred: &apos; + msg[&apos;error&apos;][&apos;code&apos;] + &apos; &apos; + msg[&apos;error&apos;][&apos;status&apos;] + &apos;: &apos; + msg[&apos;error&apos;][&apos;message&apos;]);
+}</script>
+          </com.mirth.connect.plugins.javascriptstep.JavaScriptStep>
+        </elements>
+        <inboundTemplate encoding="base64">ewogICJlcnJvciI6IHsKICAgICJjb2RlIjogNDAzLAogICAgIm1lc3NhZ2UiOiAiUGVybWlzc2lv
+biBoZWFsdGhjYXJlLmhsN1YyTWVzc2FnZXMuaW5nZXN0IGRlbmllZCBvbiByZXNvdXJjZSBwcm9q
+ZWN0cy9oZWFsdGhjYXJlLWludGVncmF0aW9ucy9sb2NhdGlvbnMvdXMtY2VudHJhbDEvZGF0YXNl
+dHMvSEVBTFRIQ0FSRV9JTlRFR1JBVElPTlNfREFUQV9TVE9SRS9obDdWMlN0b3Jlcy9IRUFMVEhD
+QVJFX0lOVEVHUkFUSU9OU19ITDdfU1RPUkUgKG9yIGl0IG1heSBiZSBtYWxmb3JtZWQgb3Igbm90
+IGV4aXN0KSIsCiAgICAic3RhdHVzIjogIlBFUk1JU1NJT05fREVOSUVEIgogIH0KfQo=</inboundTemplate>
+        <outboundTemplate encoding="base64"></outboundTemplate>
+        <inboundDataType>JSON</inboundDataType>
+        <outboundDataType>JSON</outboundDataType>
+        <inboundProperties class="com.mirth.connect.plugins.datatypes.json.JSONDataTypeProperties" version="3.7.0">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.json.JSONBatchProperties" version="3.7.0">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </inboundProperties>
+        <outboundProperties class="com.mirth.connect.plugins.datatypes.json.JSONDataTypeProperties" version="3.7.0">
+          <batchProperties class="com.mirth.connect.plugins.datatypes.json.JSONBatchProperties" version="3.7.0">
+            <splitType>JavaScript</splitType>
+            <batchScript></batchScript>
+          </batchProperties>
+        </outboundProperties>
+      </responseTransformer>
+      <filter version="3.7.0">
+        <elements/>
+      </filter>
+      <transportName>HTTP Sender</transportName>
+      <mode>DESTINATION</mode>
+      <enabled>true</enabled>
+      <waitForPrevious>true</waitForPrevious>
+    </connector>
+  </destinationConnectors>
+  <preprocessingScript>// Modify the message variable below to pre process data
+return message;</preprocessingScript>
+  <postprocessingScript>// This script executes once after a message has been processed
+// Responses returned from here will be stored as &quot;Postprocessor&quot; in the response map
+return;</postprocessingScript>
+  <deployScript>// This script executes once when the channel is deployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</deployScript>
+  <undeployScript>// This script executes once when the channel is undeployed
+// You only have access to the globalMap and globalChannelMap here to persist data
+return;</undeployScript>
+  <properties version="3.7.0">
+    <clearGlobalChannelMap>true</clearGlobalChannelMap>
+    <messageStorageMode>DEVELOPMENT</messageStorageMode>
+    <encryptData>false</encryptData>
+    <removeContentOnCompletion>false</removeContentOnCompletion>
+    <removeOnlyFilteredOnCompletion>false</removeOnlyFilteredOnCompletion>
+    <removeAttachmentsOnCompletion>false</removeAttachmentsOnCompletion>
+    <initialState>STARTED</initialState>
+    <storeAttachments>true</storeAttachments>
+    <metaDataColumns>
+      <metaDataColumn>
+        <name>SOURCE</name>
+        <type>STRING</type>
+        <mappingName>mirth_source</mappingName>
+      </metaDataColumn>
+      <metaDataColumn>
+        <name>TYPE</name>
+        <type>STRING</type>
+        <mappingName>mirth_type</mappingName>
+      </metaDataColumn>
+    </metaDataColumns>
+    <attachmentProperties version="3.7.0">
+      <type>None</type>
+      <properties/>
+    </attachmentProperties>
+    <resourceIds class="linked-hash-map">
+      <entry>
+        <string>Default Resource</string>
+        <string>[Default Resource]</string>
+      </entry>
+    </resourceIds>
+  </properties>
+  <exportData>
+    <metadata>
+      <enabled>true</enabled>
+      <lastModified>
+        <time>1550440542208</time>
+        <timezone>America/Chicago</timezone>
+      </lastModified>
+      <pruningSettings>
+        <pruneMetaDataDays>7</pruneMetaDataDays>
+        <archiveEnabled>true</archiveEnabled>
+      </pruningSettings>
+    </metadata>
+  </exportData>
+</channel>
