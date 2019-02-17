@@ -1,5 +1,6 @@
-<img src="https://healthcareintegrations.com/images/logos/HealthcareIntegrations.png" width="455" height="124" align="center">
-
+<p align="center">
+  <img src="https://healthcareintegrations.com/images/logos/HealthcareIntegrations.png" width="455" height="124">
+</p>
 # Google-Cloud-NextGen-Connect
 
 This is a NextGen Connect (formerly known as Mirth Connect) channel that allows you to transmit HL7 2.x messages to the Google Cloud Healthcare API.
