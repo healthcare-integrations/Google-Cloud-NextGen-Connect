@@ -17,9 +17,7 @@ This is a NextGen Connect (formerly known as Mirth Connect) channel that allows 
 * [A Google Healthcare API HL7v2 Store](https://cloud.google.com/healthcare/docs/how-tos/hl7v2)
 
 ### Installation of NextGen Connect
-Installation of NextGen Connect is outside of the scope of this document. Installation varies depending on the OS and your environment. If you need help installing NextGen Connect, Healthcare Integrations offers installation guidance, support, and troubleshooting at an hourly rate. We provide as much or as little support as you need. 
-
-Contact us at:
+Installation of NextGen Connect is outside of the scope of this document. Installation varies depending on the OS and your environment. If you need help installing NextGen Connect, Healthcare Integrations offers installation guidance, support, and troubleshooting at an hourly rate. We provide as much or as little support as you need. Contact us at:
 
 [https://wwww.healthcareintegrations.com](https://wwww.healthcareintegrations.com)
 
