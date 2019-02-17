@@ -4,7 +4,7 @@
 
 # Google-Cloud-NextGen-Connect
 
-This is a NextGen Connect (formerly known as Mirth Connect) channel that allows you to transmit HL7 2.x messages to the Google Cloud Healthcare API. Prior knowledge of HL7 and NextGen Connect is encouraged.
+This is a NextGen Connect (formerly known as Mirth Connect) channel that allows you to transmit HL7 2.x messages to the Google Cloud Healthcare API. Prior knowledge of HL7 and NextGen Connect is encouraged but not required.
 
 
 ## Prerequisites
