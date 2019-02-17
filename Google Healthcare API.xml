@@ -8,7 +8,7 @@ https://www.healthcareintegrations.com/
 Contact@HealthcareIntegrations.com
 
 We offer support and customization of this channel, development of new channels, and much more. If you need assistance, please contact us!</description>
-  <revision>6</revision>
+  <revision>5</revision>
   <sourceConnector version="3.7.0">
     <metaDataId>0</metaDataId>
     <name>sourceConnector</name>
@@ -341,6 +341,7 @@ if (!expiry || Date() &gt; expiry) {
 importPackage(javax.crypto);
 importPackage(javax.crypto.spec);
 importPackage(java.security);
+importPackage(java.security.spec);
 
 //Header
 var header = {};
@@ -699,7 +700,7 @@ return;</undeployScript>
     <metadata>
       <enabled>true</enabled>
       <lastModified>
-        <time>1550440542208</time>
+        <time>1550444921793</time>
         <timezone>America/Chicago</timezone>
       </lastModified>
       <pruningSettings>
