@@ -8,7 +8,7 @@ This is a NextGen Connect (formerly known as Mirth Connect) channel that allows 
 
 
 ## Prerequisites
-* [NextGen Connect (Mirth Connect) (runs on Windows, Linux, and OS X)](https://www.nextgen.com/products-and-services/NextGen-Connect-Integration-Engine-Downloads)
+* [NextGen Connect (Mirth Connect) Version 3.7.0 (runs on Windows, Linux, and OS X)](https://www.nextgen.com/products-and-services/NextGen-Connect-Integration-Engine-Downloads)
 * [A Google Cloud Account](https://cloud.google.com/)
 * [Access to the Google Cloud Healthcare API](https://cloud.google.com/healthcare/)
 * [A Service Account with the 'Healthcare HL7v2 Message Ingest' role](https://cloud.google.com/iam/docs/creating-managing-service-accounts)
@@ -76,5 +76,5 @@ PV1||I|H73 RM1^1^^HIGHWAY 73 CLINIC||||5148^MARY QUINN|||||||||Y||||||||||||||||
 
 ## Older Versions of NextGen Connect/Mirth Connect
 
-The current channel is only supported by NextGen Connect Version 3.7.0. If you are running an older version of NextGen Connect/Mirth Connect, please contact us at Contact@HealthcareIntegrations.com with your version number and we will provide a version to you. Alternatively, please create a new Issue in this repo and specify your version number there. We will add additional versions to this repo as needed.
+The current channel is only supported by NextGen Connect Version 3.7.0 or newer. If you are running an older version of NextGen Connect/Mirth Connect, please contact us at Contact@HealthcareIntegrations.com with your version number and we will provide a version to you. Alternatively, please create a new Issue in this repo and specify your version number there. We will add additional versions to this repo as needed.
 
